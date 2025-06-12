@@ -4,12 +4,6 @@ import threading
 import random
 import base64
 
-#graph TD
-    #A[启动服务器] --> B[绑定主端口]
-    #B --> C[等待客户端请求]
-    #C --> D{收到DOWNLOAD请求?}
-    #D --> |是| E[创建传输线程]
-    #E --> F[线程初始化]
     #F --> G[检查文件存在性]
     #G --> |存在| H[发送OK响应]
     #G --> |不存在| I[发送ERR响应]
@@ -66,29 +60,33 @@ def run(self):
     try:
         file_size = os.path.getsize(self.file_path)
 
-
         response = f"OK {self.filename} SIZE {file_size} PORT {self.port}"
-        self.sock.sendto(response, self.client_addr)
+        self.sock.sendto(response.encode(), self.client_addr)
 
-        with open(self.file_path, 'r') as f:
+        with open(self.file_path, 'rb') as f:
             while True:
-                data, addr = self.sock.recvfrom(1024)
-                message = data.split()
+                try:
+                    data, addr = self.sock.recvfrom(1024)
+                    message = data.decode().split()
 
-                if message[0] == "FILE" and message[2] == "GET":
-                    start = message[4]
-                    end = message[6]
-                    f.seek(start)
-                    chunk = f.read(end - start)
-                    b64_data = base64.b64encode(chunk)
-                    response = f"FILE {self.filename} OK START {start} END {end} DATA {b64_data}"  # 拼写错误
-                    self.sock.sendto(response, addr)
+                    if message[0] == "FILE" and message[2] == "GET":
+                        start = int(message[4])
+                        end = int(message[6])
+                        f.seek(start)
+                        chunk = f.read(end - start + 1)
+                        b64_data = base64.b64encode(chunk).decode()
+                        response = f"FILE {self.filename} OK START {start} END {end} DATA {b64_data}"
+                        self.sock.sendto(response.encode(), addr)
 
-                elif message[0] == "FILE" and message[2] == "CLOSE":
-                    response = "FILE CLOSE_OK"
-                    break
+                    elif message[0] == "FILE" and message[2] == "CLOSE":
+                        response = f"FILE {self.filename} CLOSE_OK"
+                        self.sock.sendto(response.encode(), addr)
+                        break
 
-    except:
-        response = "ERROR"
-        self.sock.sendto(response, self.client_addr)
-    
+                except socket.timeout:
+                    continue
+    except FileNotFoundError:
+        response = f"ERR {self.filename} NOT_FOUND"
+        self.sock.sendto(response.encode(), self.client_addr)
+    finally:
+        self.sock.close()
