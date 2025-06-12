@@ -4,19 +4,6 @@ import threading
 import random
 import base64
 
-    #F --> G[检查文件存在性]
-    #G --> |存在| H[发送OK响应]
-    #G --> |不存在| I[发送ERR响应]
-    #H --> J[等待数据请求]
-    #J --> K{收到FILE GET?}
-    #K --> |是| L[读取文件块]
-    #L --> M[Base64编码]
-    #M --> N[发送数据响应]
-    #N --> J
-    #K --> |收到CLOSE| O[发送CLOSE_OK]
-    ##O --> P[关闭连接]
-    #I --> P
-
 
 def main():
     # 检查参数
@@ -90,3 +77,9 @@ def run(self):
         self.sock.sendto(response.encode(), self.client_addr)
     finally:
         self.sock.close()
+
+        if message[0] == "DOWNLOAD":
+            filename = message[1]
+            print(f"Download request for {filename} from {addr}")
+            thread = FileTransferThread(filename, addr, port)
+            thread.start()
