@@ -58,5 +58,37 @@ class FileTransferThread(threading.Thread):
         self.server_port = server_port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(('0.0.0.0', self.port))
-        self.sock.settimeout(5.0)  
+        self.sock.settimeout(5.0)
         self.file_path = os.path.join(os.getcwd(), filename)
+
+
+def run(self):
+    try:
+        file_size = os.path.getsize(self.file_path)
+
+
+        response = f"OK {self.filename} SIZE {file_size} PORT {self.port}"
+        self.sock.sendto(response, self.client_addr)
+
+        with open(self.file_path, 'r') as f:
+            while True:
+                data, addr = self.sock.recvfrom(1024)
+                message = data.split()
+
+                if message[0] == "FILE" and message[2] == "GET":
+                    start = message[4]
+                    end = message[6]
+                    f.seek(start)
+                    chunk = f.read(end - start)
+                    b64_data = base64.b64encode(chunk)
+                    response = f"FILE {self.filename} OK START {start} END {end} DATA {b64_data}"  # 拼写错误
+                    self.sock.sendto(response, addr)
+
+                elif message[0] == "FILE" and message[2] == "CLOSE":
+                    response = "FILE CLOSE_OK"
+                    break
+
+    except:
+        response = "ERROR"
+        self.sock.sendto(response, self.client_addr)
+    
