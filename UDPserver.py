@@ -17,21 +17,41 @@ class FileTransferThread(threading.Thread):
         self.sock.settimeout(5.0)
         self.file_path = os.path.join(os.getcwd(), filename)
 
-        def run(self):
-            try:
-                file_size = os.path.getsize(self.file_path)
-                response = f"OK {self.filename} SIZE {file_size} PORT {self.port}"
-                self.sock.sendto(response.encode(), self.client_addr)
+    def run(self):
+        try:
+            file_size = os.path.getsize(self.file_path)
+            response = f"OK {self.filename} SIZE {file_size} PORT {self.port}"
+            self.sock.sendto(response.encode(), self.client_addr)
 
-                with open(self.file_path, 'rb') as f:
-                    while True:
-                        try:
-                            data, addr = self.sock.recvfrom(1024)
-                            message = data.decode().split()
+            with open(self.file_path, 'rb') as f:
+                while True:
+                    try:
+                        data, addr = self.sock.recvfrom(1024)
+                        message = data.decode().split()
 
-                            if
+                        if message[0] == "FILE" and message[2] == "GET":
+                            start = int(message[4])
+                            end = int(message[6])
+                            f.seek(start)
+                            chunk = f.read(end - start + 1)
+                            b64_data = base64.b64encode(chunk).decode()
+                            response = f"FILE {self.filename} OK START {start} END {end} DATA {b64_data}"
+                            self.sock.sendto(response.encode(), addr)
 
-                            elif 
+                        elif message[0] == "FILE" and message[2] == "CLOSE":
+                            response = f"FILE {self.filename} CLOSE_OK"
+                            self.sock.sendto(response.encode(), addr)
+                            break
+
+                    except socket.timeout:
+                        continue
+
+        except FileNotFoundError:
+            response = f"ERR {self.filename} NOT_FOUND"
+            self.sock.sendto(response.encode(), self.client_addr)
+        finally:
+            self.sock.close()
+
 
 def main():
     # 检查参数
