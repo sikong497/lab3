@@ -5,6 +5,20 @@ import random
 import base64
 
 
+class FileTransferThread(threading.Thread):
+    def __init__(self, filename, client_addr, server_port):
+        super().__init__()
+        self.filename = filename
+        self.client_addr = client_addr
+        self.port = random.randint(50000, 51000)
+        self.server_port = server_port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind(('0.0.0.0', self.port))
+        self.sock.settimeout(5.0)
+        self.file_path = os.path.join(os.getcwd(), filename)
+
+
+
 def main():
     # 检查参数
     if len(os.sys.argv) != 2:
@@ -30,17 +44,7 @@ def main():
             # 这里会创建传输线程
 
 
-class FileTransferThread(threading.Thread):
-    def __init__(self, filename, client_addr, server_port):
-        super().__init__()
-        self.filename = filename
-        self.client_addr = client_addr
-        self.port = random.randint(50000, 51000)
-        self.server_port = server_port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind(('0.0.0.0', self.port))
-        self.sock.settimeout(5.0)
-        self.file_path = os.path.join(os.getcwd(), filename)
+
 
 
 def run(self):
