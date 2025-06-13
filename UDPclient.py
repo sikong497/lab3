@@ -47,7 +47,19 @@ def main():
 
     f = open(filelist)
     for line in f:
-        filename = line  
+        filename = line
 
 main()
 
+
+def send_and_receive(sock, message, address, max_retries=5):
+    for i in range(max_retries):
+        try:
+            sock.sendto(message, address)
+            data, addr = sock.recv(65535)
+            return data
+        except:
+            print("Error happened")
+            continue
+
+    return -1
