@@ -5,6 +5,8 @@ import sys
 import time
 #graph TD
     #A[启动客户端] --> B[解析命令行参数]
+
+
     #B --> C[读取文件列表]
     #C --> D[遍历文件列表]
     #D --> E[下载单个文件]
@@ -29,3 +31,23 @@ import time
     #U --> V{更多文件?}
     #V --> |是| D
     #V --> |否| W[关闭套接字退出]
+
+
+import socket
+import sys
+
+
+def main():
+    host = sys.argv[1]
+    port = sys.argv[2]
+    filelist = sys.argv[3]
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((host, port))
+
+    f = open(filelist)
+    for line in f:
+        filename = line  
+
+main()
+
