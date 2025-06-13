@@ -77,3 +77,13 @@ def download_file(client_sock, filename, server_addr, server_port):
         chunk, _ = client_sock.recvfrom(file_size)
         f.write(chunk)
         received += len(chunk)
+
+        def main():
+            # ... (之前的参数检查代码不变)
+
+            client_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+            try:
+               
+            finally:
+                client_sock.close()
