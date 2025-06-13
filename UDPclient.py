@@ -40,22 +40,18 @@ def main():
     client_sock.close()
 
 
-if __name__ == "__main__":
-    main()
-
-    
-
 def send_and_receive(sock, message, address, max_retries=5):
-    for i in range(max_retries):
+    timeout = 1.0  # 初始超时1秒
+    for attempt in range(max_retries):
         try:
-            sock.sendto(message, address)
-            data, addr = sock.recv(65535)
-            return data
-        except:
-            print("Error happened")
-            continue
-
-    return -1
+            sock.sendto(message.encode(), address)
+            sock.settimeout(timeout)
+            response, _ = sock.recvfrom(2048)
+            return response.decode()
+        except socket.timeout:
+            print(f"Timeout (attempt {attempt+1}), retrying...")
+            timeout *= 2  # 每次超时后等待时间翻倍
+    return None  
 
 
 def download_file(client_sock, filename, server_addr, server_port):
