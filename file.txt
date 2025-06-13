@@ -1,0 +1,7 @@
+mkdir -p ~/COMPX234-A4/Server
+cd ~/COMPX234-A4/Server
+touch UDPserver.py
+# 将服务器代码复制到 UDPserver.py 中
+echo "测试文件内容" > test1.jpg
+echo "PDF文档内容" > document.pdf
+echo "视频内容" > video.mp4
