@@ -4,23 +4,7 @@ import base64
 import sys
 import time
 #graph TD
-    #A[启动客户端] --> B[解析命令行参数]
 
-
-    #B --> C[读取文件列表]
-    #C --> D[遍历文件列表]
-    #D --> E[下载单个文件]
-    #E --> F[发送DOWNLOAD请求]
-    #F --> G{收到响应?}
-    #G --> |是| H[解析OK响应]
-    #G --> |否| I[重试或放弃]
-    #H --> J[创建传输套接字]
-    #J --> K[循环请求数据块]
-    #K --> L[发送FILE GET请求]
-    #L --> M{收到数据响应?}
-    #M --> |是| N[解码并保存数据]
-    #M --> |否| O[重试或放弃]
-    #N --> P{下载完成?}
     #P --> |否| K
     #P --> |是| Q[发送CLOSE请求]
     #Q --> R{收到CLOSE_OK?}
@@ -32,25 +16,34 @@ import time
     #V --> |是| D
     #V --> |否| W[关闭套接字退出]
 
-
-import socket
-import sys
-
-
 def main():
+    # 基本参数检查
+    if len(sys.argv) != 4:
+        print("Usage: python3 UDPclient.py <HOST> <PORT> <FILELIST>")
+        return
+
     host = sys.argv[1]
-    port = sys.argv[2]
+    port = int(sys.argv[2])
     filelist = sys.argv[3]
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((host, port))
+    # 创建UDP套接字
+    client_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    f = open(filelist)
-    for line in f:
-        filename = line
+    # 读取文件列表并处理
+    with open(filelist, 'r') as f:
+        for line in f:
+            filename = line.strip()
+            if filename:
+                # 这里会调用下载函数
+                pass
 
-main()
+    client_sock.close()
 
+
+if __name__ == "__main__":
+    main()
+
+    
 
 def send_and_receive(sock, message, address, max_retries=5):
     for i in range(max_retries):
