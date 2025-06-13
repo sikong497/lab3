@@ -78,12 +78,17 @@ def download_file(client_sock, filename, server_addr, server_port):
         f.write(chunk)
         received += len(chunk)
 
-        def main():
-            # ... (之前的参数检查代码不变)
+    def main():
+        # ... (之前的参数检查代码不变)
 
-            client_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        client_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-            try:
-               
-            finally:
-                client_sock.close()
+        try:
+            with open(filelist, 'r') as f:
+                for line in f:
+                    filename = line.strip()
+                    if filename:
+                        if not download_file(client_sock, filename, host, port):
+                            print(f"Failed to download {filename}")
+        finally:
+            client_sock.close()
