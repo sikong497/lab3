@@ -63,3 +63,17 @@ def send_and_receive(sock, message, address, max_retries=5):
             continue
 
     return -1
+
+
+def download_file(client_sock, filename, server_addr, server_port):
+    client_sock.sendto(f"GET {filename}".encode(), (server_addr, server_port))
+    data, _ = client_sock.recvfrom(1024)
+    file_size = int(data.split()[1])
+
+    f = open(filename, 'wb')
+
+    received = 0
+    while received < file_size:
+        chunk, _ = client_sock.recvfrom(file_size)
+        f.write(chunk)
+        received += len(chunk)
