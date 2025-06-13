@@ -1,0 +1,7 @@
+mkdir -p ~/COMPX234-A4/Client
+cd ~/COMPX234-A4/Client
+touch UDPclient.py
+# 将客户端代码复制到 UDPclient.py 中
+echo "test1.jpg" > files.txt
+echo "document.pdf" >> files.txt
+echo "video.mp4" >> files.txt
